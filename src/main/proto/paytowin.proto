@@ -7,9 +7,39 @@ import "google/protobuf/empty.proto";
 option java_package = "com.paytowin.grpc";
 
 service PayToWin {
-  rpc Login(LoginRequest) returns (google.protobuf.Empty);
+  rpc GetPlayers(PlayersRequest) returns (stream PlayersResponse);
+  rpc ApplyEffect(EffectRequest) returns (EffectResponse);
 }
 
-message LoginRequest {
-  string password = 1;
+message PlayersRequest {}
+
+message PlayersResponse {
+  repeated string players = 1;
+}
+
+message PotionEffect {
+  string name = 1;
+  uint32 duration = 2;
+  uint32 amplifier = 3;
+}
+
+message DiamondTool {
+  string toolName = 1;
+}
+
+enum DatalessEffect {
+  RandomPotions = 0;
+}
+
+message EffectRequest {
+  oneof effect {
+    PotionEffect potion = 2;
+    DatalessEffect dataless = 3;
+    DiamondTool tool = 4;
+  }
+  string player = 1;
+}
+
+message EffectResponse {
+  bool success = 1;
 }
