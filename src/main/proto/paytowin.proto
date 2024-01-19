@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package PayToWin;
+
+import "google/protobuf/empty.proto";
+
+option java_package = "com.paytowin.grpc";
+
+service PayToWin {
+  rpc Login(LoginRequest) returns (google.protobuf.Empty);
+}
+
+message LoginRequest {
+  string password = 1;
+}

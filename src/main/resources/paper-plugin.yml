@@ -1,0 +1,4 @@
+name: PayToWin
+version: '${version}'
+main: org.koornbeurs.paytowin.PayToWin
+api-version: '1.20'
