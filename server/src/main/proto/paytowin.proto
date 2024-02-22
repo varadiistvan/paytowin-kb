@@ -1,0 +1,93 @@
+syntax = "proto3";
+
+package PayToWin;
+
+import "google/protobuf/empty.proto";
+
+option java_package = "com.paytowin.grpc";
+
+service PayToWin {
+  rpc GetPlayers(PlayersRequest) returns (stream PlayersResponse);
+  rpc ApplyEffect(EffectRequest) returns (EffectResponse);
+}
+
+message PlayersRequest {}
+
+message PlayersResponse {
+  repeated string players = 1;
+}
+
+enum PotionName {
+  SPEED = 0;
+  SLOW = 1;
+  FAST_DIGGING = 2;
+  SLOW_DIGGING = 3;
+  INCREASE_DAMAGE = 4;
+  HEAL = 5;
+  HARM = 6;
+  JUMP = 7;
+  CONFUSION = 8;
+  REGENERATION = 9;
+  DAMAGE_RESISTANCE = 10;
+  FIRE_RESISTANCE = 11;
+  //  WATER_BREATHING = 12;
+  INVISIBILITY = 13;
+  BLINDNESS = 14;
+  NIGHT_VISION = 15;
+  HUNGER = 16;
+  WEAKNESS = 17;
+  POISON = 18;
+  WITHER = 19;
+  HEALTH_BOOST = 20;
+  ABSORPTION = 21;
+  //  SATURATION = 22;
+  GLOWING = 23;
+  LEVITATION = 24;
+  //  LUCK = 25;
+  //  UNLUCK = 26;
+  SLOW_FALLING = 27;
+  //  CONDUIT_POWER = 28;
+  //  DOLPHINS_GRACE = 29;
+  //  BAD_OMEN = 30;
+  //  HERO_OF_THE_VILLAGE = 31;
+  DARKNESS = 32;
+}
+
+message PotionEffect {
+  PotionName name = 1;
+  uint32 duration = 2;
+  uint32 amplifier = 3;
+}
+
+enum Tool {
+  Boots = 0;
+  Leggings = 1;
+  Chestplate = 2;
+  Helmet = 3;
+  Axe = 4;
+  Hoe = 5;
+  Pickaxe = 6;
+  Showel = 7;
+  Sword = 8;
+}
+
+message DiamondTool {
+  string toolName = 1;
+}
+
+enum DatalessEffect {
+  RandomPotions = 0;
+}
+
+message EffectRequest {
+  oneof effect {
+    PotionEffect potion = 2;
+    DatalessEffect dataless = 3;
+    Tool tool = 4;
+  }
+  string player = 1;
+}
+
+message EffectResponse {
+  bool success = 1;
+}
