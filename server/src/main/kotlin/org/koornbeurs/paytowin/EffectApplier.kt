@@ -2,6 +2,9 @@ package org.koornbeurs.paytowin
 
 import com.paytowin.grpc.Paytowin.PotionEffect
 import com.paytowin.grpc.Paytowin.Tool
+import me.libraryaddict.disguise.DisguiseAPI
+import me.libraryaddict.disguise.disguisetypes.DisguiseType
+import me.libraryaddict.disguise.disguisetypes.MobDisguise
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -14,11 +17,13 @@ class EffectApplier(private val player: Player, private val server: Plugin) {
     fun tool(tool: Tool) {
         Bukkit.getScheduler().runTask(server, Runnable {
             val item = ItemStack(Material.DIAMOND_HOE)
-            
+
             Bukkit.getScheduler().runTaskLater(server, Runnable {
                 println("Removing $item")
             }, 20 * 4)
         })
+
+        DisguiseAPI.disguiseToAll(player, MobDisguise(DisguiseType.ALLAY))
 
     }
 

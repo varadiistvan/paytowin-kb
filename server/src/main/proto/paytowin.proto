@@ -2,8 +2,6 @@ syntax = "proto3";
 
 package PayToWin;
 
-import "google/protobuf/empty.proto";
-
 option java_package = "com.paytowin.grpc";
 
 service PayToWin {
@@ -71,8 +69,9 @@ enum Tool {
   Sword = 8;
 }
 
-message DiamondTool {
-  string toolName = 1;
+message Item {
+  string itemName = 1;
+  uint32 amount = 2;
 }
 
 enum DatalessEffect {
