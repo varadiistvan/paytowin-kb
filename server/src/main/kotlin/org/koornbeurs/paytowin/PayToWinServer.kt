@@ -6,6 +6,7 @@ import com.paytowin.grpc.Paytowin
 import com.paytowin.grpc.Paytowin.EffectResponse
 import io.grpc.Server
 import io.grpc.ServerBuilder
+import io.grpc.protobuf.services.ProtoReflectionService
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -72,6 +73,7 @@ class PayToWinServer(private val port: Int, private val bukkitServer: PayToWin) 
     val server: Server = ServerBuilder
         .forPort(port)
         .addService(PayToWinService(playerChannels, bukkitServer))
+        .addService(ProtoReflectionService.newInstance())
         .intercept(PasswordValidationInterceptor())
         .build()
 

@@ -4,7 +4,7 @@ import viteLogo from '/vite.svg'
 import './App.css'
 import { PayToWinClient } from './paytowin.client'
 import { GrpcWebFetchTransport } from '@protobuf-ts/grpcweb-transport'
-import { PlayersRequest } from './paytowin'
+import { PlayersRequest, PotionName } from './paytowin'
 
 
 function App() {
@@ -12,13 +12,31 @@ function App() {
 
   useEffect(() => {
     let client = new PayToWinClient(new GrpcWebFetchTransport({
-      baseUrl: "http://localhost:50051"
+      baseUrl: "http://localhost:8080",
+      meta: {
+        "password": "abc"
+      }
     }))
     let a = client.getPlayers(PlayersRequest.create());
 
     (async () => {
-      for await (let players of a.responses) {
-        console.log(players)
+      try {
+          for await (let {players} of a.responses) {
+            console.log(players)
+            let player = players[0]
+  
+            client.applyEffect({player: player, effect: {
+              oneofKind: "potion",
+              potion: {
+                name: PotionName.JUMP,
+                duration: 10,
+                amplifier: 10
+              }
+            }}).then(console.log)
+  
+          }
+      } catch (error) {
+        console.log(error)
       }
     })()
 
