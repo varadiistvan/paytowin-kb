@@ -1,10 +1,8 @@
 package org.koornbeurs.paytowin
 
+import com.paytowin.grpc.Paytowin
+import com.paytowin.grpc.Paytowin.DiamondTool
 import com.paytowin.grpc.Paytowin.PotionEffect
-import com.paytowin.grpc.Paytowin.Tool
-import me.libraryaddict.disguise.DisguiseAPI
-import me.libraryaddict.disguise.disguisetypes.DisguiseType
-import me.libraryaddict.disguise.disguisetypes.MobDisguise
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -14,16 +12,25 @@ import org.bukkit.potion.PotionEffectType
 
 class EffectApplier(private val player: Player, private val server: Plugin) {
 
-    fun tool(tool: Tool) {
+    fun tool(tool: DiamondTool) {
         Bukkit.getScheduler().runTask(server, Runnable {
-            val item = ItemStack(Material.DIAMOND_HOE)
+            val item = when (tool) {
+                DiamondTool.Axe -> ItemStack(Material.DIAMOND_AXE, 1)
+                DiamondTool.Hoe -> ItemStack(Material.DIAMOND_HOE, 1)
+                DiamondTool.Pickaxe -> ItemStack(Material.DIAMOND_PICKAXE, 1)
+                DiamondTool.Shovel -> ItemStack(Material.DIAMOND_SHOVEL, 1)
+                DiamondTool.Sword -> ItemStack(Material.DIAMOND_SWORD, 1)
+                DiamondTool.Helmet -> ItemStack(Material.DIAMOND_HELMET, 1)
+                DiamondTool.Chestplate -> ItemStack(Material.DIAMOND_CHESTPLATE, 1)
+                DiamondTool.Leggings -> ItemStack(Material.DIAMOND_LEGGINGS, 1)
+                DiamondTool.Boots -> ItemStack(Material.DIAMOND_BOOTS, 1)
+                DiamondTool.UNRECOGNIZED -> return@Runnable
+            }
 
-            Bukkit.getScheduler().runTaskLater(server, Runnable {
-                println("Removing $item")
-            }, 20 * 4)
+            player.inventory.addItem(item)
+
         })
 
-        DisguiseAPI.disguiseToAll(player, MobDisguise(DisguiseType.ALLAY))
 
     }
 
@@ -38,6 +45,15 @@ class EffectApplier(private val player: Player, private val server: Plugin) {
                 ?.let {
                     player.addPotionEffect(it)
                 }
+        })
+    }
+
+    fun item(itemName: Paytowin.MinecraftMaterial, amount: Int) {
+        Bukkit.getScheduler().runTask(server, Runnable {
+            val item = Material.getMaterial(itemName.toString())?.let { ItemStack(it, amount) }
+            if (item != null) {
+                player.inventory.addItem(item)
+            }
         })
     }
 

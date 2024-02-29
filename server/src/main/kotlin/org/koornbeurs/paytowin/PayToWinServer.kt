@@ -12,13 +12,19 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.runBlocking
 import org.bukkit.Bukkit
+import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
+import org.bukkit.event.entity.PlayerDeathEvent
+import org.bukkit.scheduler.BukkitRunnable
+import java.util.*
 import java.util.concurrent.atomic.AtomicReference
+
 
 class PayToWinServer(private val port: Int, private val bukkitServer: PayToWin) {
     internal class PayToWinService(
         private val playerChannels: AtomicReference<ArrayList<Channel<Collection<String>>>>,
-        private val bukkitServer: PayToWin
+        private val bukkitServer: PayToWin,
+        private val keepInventoryPlayers: HashSet<UUID>
     ) :
         PayToWinGrpcKt.PayToWinCoroutineImplBase() {
         override fun getPlayers(request: Paytowin.PlayersRequest): Flow<Paytowin.PlayersResponse> {
@@ -47,15 +53,57 @@ class PayToWinServer(private val port: Int, private val bukkitServer: PayToWin) 
             when (request.effectCase) {
                 Paytowin.EffectRequest.EffectCase.TOOL -> effectApplier.tool(request.tool)
                 Paytowin.EffectRequest.EffectCase.POTION -> effectApplier.potion(request.potion)
+                Paytowin.EffectRequest.EffectCase.SPAWNENTITY -> {
+                    Bukkit.getScheduler().runTask(bukkitServer, Runnable {
+                        for (i in 0..request.spawnEntity.amount) {
+                            if (request.spawnEntity.entity == Paytowin.MinecraftEntity.LIGHTNING) {
+                                bukkitPlayer.world.strikeLightning(bukkitPlayer.location)
+                            } else {
+                                EntityType.fromName(request.spawnEntity.entity.toString())
+                                    ?.let { bukkitPlayer.world.spawnEntity(bukkitPlayer.location, it) }
+                            }
+                        }
+                    })
+                }
+
                 Paytowin.EffectRequest.EffectCase.DATALESS -> {
                     when (request.dataless) {
                         Paytowin.DatalessEffect.RandomPotions -> {
                             RandomPotionApplier(bukkitServer, 40, 10, bukkitPlayer).runTaskTimer(bukkitServer, 0L, 20L)
                         }
 
+                        Paytowin.DatalessEffect.Spinny -> {
+                            SpinnyApplier(bukkitServer, 5, bukkitPlayer).runTaskTimer(bukkitServer, 0L, 20L)
+                        }
+
+                        Paytowin.DatalessEffect.PutInAdventure -> {
+                            Bukkit.getScheduler().runTask(bukkitServer, Runnable {
+                                bukkitPlayer.gameMode = org.bukkit.GameMode.ADVENTURE
+                                Bukkit.getScheduler().runTaskLater(bukkitServer, Runnable {
+                                    bukkitPlayer.gameMode = org.bukkit.GameMode.SURVIVAL
+                                }, 20 * 5)
+                            })
+                        }
+
+                        Paytowin.DatalessEffect.EnableKeepinventory -> {
+                            val playerUUID: UUID = bukkitPlayer.getUniqueId()
+                            keepInventoryPlayers.add(playerUUID)
+
+                            object : BukkitRunnable() {
+                                override fun run() {
+                                    // This will run after 5 minutes and remove the player from the set
+                                    keepInventoryPlayers.remove(playerUUID)
+                                }
+                            }.runTaskLater(this.bukkitServer, (20 * 60 * 5).toLong())
+                        }
+
                         else -> return EffectResponse.newBuilder().setSuccess(false)
                             .build()
                     }
+                }
+
+                Paytowin.EffectRequest.EffectCase.ITEM -> {
+                    effectApplier.item(request.item.itemName, request.item.amount)
                 }
 
                 else -> return EffectResponse.newBuilder().setSuccess(false).build()
@@ -69,10 +117,11 @@ class PayToWinServer(private val port: Int, private val bukkitServer: PayToWin) 
 
     private val playerChannels = AtomicReference(ArrayList<Channel<Collection<String>>>());
 
+    private val keepInventoryPlayers = HashSet<UUID>()
 
     val server: Server = ServerBuilder
         .forPort(port)
-        .addService(PayToWinService(playerChannels, bukkitServer))
+        .addService(PayToWinService(playerChannels, bukkitServer, keepInventoryPlayers))
         .addService(ProtoReflectionService.newInstance())
         .intercept(PasswordValidationInterceptor())
         .build()
@@ -107,6 +156,15 @@ class PayToWinServer(private val port: Int, private val bukkitServer: PayToWin) 
             run {
                 channel.send(players)
             }
+        }
+    }
+
+    fun playerDead(event: PlayerDeathEvent) {
+        val player = event.entity
+        if (keepInventoryPlayers.contains(player.uniqueId)) {
+            event.keepInventory = true
+            event.drops.clear() // Optional: clears items that would have been dropped
+            event.droppedExp = 0 // Optional: prevents experience from dropping
         }
     }
 }
