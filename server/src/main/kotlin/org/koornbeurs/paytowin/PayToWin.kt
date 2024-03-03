@@ -35,6 +35,7 @@ class PayToWin : JavaPlugin(), Listener {
 
     @EventHandler
     fun onPlayerJoin(playerJoinEvent: PlayerJoinEvent) {
+        print("player attempted to join");
         runBlocking {
             server.sendUpdatedUserList()
         }

@@ -1,40 +1,44 @@
-import { useEffect, useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { useEffect } from 'react' //useState } from 'react'
 import './App.css'
-import { PayToWinClient } from './paytowin.client'
+import CreatePayToWinClient from './paytowinclient'
 import { GrpcWebFetchTransport } from '@protobuf-ts/grpcweb-transport'
-import { PlayersRequest, PotionName } from './paytowin'
+import { PlayersRequest } from './paytowin'//, PotionName } from './paytowin'
 
 
 function App() {
-  const [count, setCount] = useState(0)
+  //const [count, setCount] = useState(0)
+
+  const transport = new GrpcWebFetchTransport({
+    baseUrl: "http://localhost:50051",
+    meta: {
+      "password": "password"
+    }
+  }));
+
+  const client = new PayToWinClient(transport);
+
+  let players: string[] = [];
 
   useEffect(() => {
-    let client = new PayToWinClient(new GrpcWebFetchTransport({
-      baseUrl: "http://localhost:8080",
-      meta: {
-        "password": "abc"
-      }
-    }))
-    let a = client.getPlayers(PlayersRequest.create());
-
+    const playerResponse = await client.getPlayers(PlayersRequest.create());
+    players = playerResponse.players;
     (async () => {
       try {
-          for await (let {players} of a.responses) {
-            console.log(players)
-            let player = players[0]
+          // for await (const {playersList} of playerResponse.players) {
+          //   console.log(playersList)
+          //   //const player = players[0]
   
-            client.applyEffect({player: player, effect: {
-              oneofKind: "potion",
-              potion: {
-                name: PotionName.JUMP,
-                duration: 10,
-                amplifier: 10
-              }
-            }}).then(console.log)
+          //   /*client.applyEffect({player: player, effect: {
+          //     oneofKind: "potion",
+          //     potion: {
+          //       name: PotionName.JUMP,
+          //       duration: 10,
+          //       amplifier: 10
+          //     }
+          //   }}).then(console.log)*/
   
-          }
+          // }
+          console.log(playerResponse);
       } catch (error) {
         console.log(error)
       }
@@ -44,30 +48,11 @@ function App() {
   }, [])
 
 
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+  return (<>
+    <div>
+      {players.map(player => (<div>{player}</div>))}
+    </div>
+  </>);
 }
 
 export default App
