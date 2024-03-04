@@ -6,6 +6,7 @@ services:
       - ./envoy.yaml:/etc/envoy/envoy.yaml
     ports:
       - "8080:8080"  # Map Envoy's port to the same port on the host
+      #- "50050:50051"
       - "9901:9901"  # Envoy admin interface
     networks:
       - envoy-net
