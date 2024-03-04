@@ -84,6 +84,7 @@ enum DatalessEffect {
   Spinny = 1;
   PutInAdventure = 2;
   EnableKeepinventory = 3;
+  KillAllEnderDragons = 4;
 }
 
 message EffectRequest {
@@ -95,6 +96,7 @@ message EffectRequest {
     SpawnEntity spawnEntity = 6;
   }
   string player = 1;
+  string requester = 7;
 }
 
 message EffectResponse {
