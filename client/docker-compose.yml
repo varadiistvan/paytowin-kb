@@ -1,13 +1,12 @@
-version: '3.8'
+version: "3.8"
 services:
   envoy:
-    image: envoyproxy/envoy:v1.21-latest  # Use the latest version appropriate for your setup
+    image: envoyproxy/envoy:v1.21-latest # Use the latest version appropriate for your setup
     volumes:
       - ./envoy.yaml:/etc/envoy/envoy.yaml
     ports:
-      - "8080:8080"  # Map Envoy's port to the same port on the host
-      #- "50050:50051"
-      - "9901:9901"  # Envoy admin interface
+      - "8080:8080" # Map Envoy's port to the same port on the host
+      - "9901:9901" # Envoy admin interface
     networks:
       - envoy-net
 
