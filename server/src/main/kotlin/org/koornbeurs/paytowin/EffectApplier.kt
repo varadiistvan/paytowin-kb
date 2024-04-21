@@ -48,7 +48,7 @@ class EffectApplier(private val player: Player, private val server: Plugin) {
         })
     }
 
-    fun item(itemName: Paytowin.MinecraftMaterial, amount: Int) {
+    fun item(itemName: Paytowin.MinecraftMaterialWrapper.MinecraftMaterial, amount: Int) {
         Bukkit.getScheduler().runTask(server, Runnable {
             val item = Material.getMaterial(itemName.toString())?.let { ItemStack(it, amount) }
             if (item != null) {

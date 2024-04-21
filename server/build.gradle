@@ -39,6 +39,7 @@ dependencies {
     implementation 'com.google.protobuf:protobuf-kotlin:3.25.2'
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0-RC2"
     implementation 'io.github.cdimascio:dotenv-kotlin:6.4.1'
+    implementation 'com.jeff-media:custom-block-data:2.2.2'
 }
 
 def targetJavaVersion = 17
@@ -63,6 +64,7 @@ tasks.register('deleteOldJar', Delete) {
 shadowJar {
     dependsOn deleteOldJar
     relocate 'com.google.protobuf', 'myplugin.shadow.protobuf'
+    relocate 'com.jeff_media.customblockdata', 'your.package.customblockdata'
     archiveClassifier.set('')
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     // Removed the Main-Class attribute as it's unnecessary for PaperMC plugins

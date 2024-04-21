@@ -29,7 +29,7 @@ class RandomPotionApplier(plugin: Plugin, intervalTicks: Int = 40, repetitions: 
             this.cancel() // Stop the task after 'n' repetitions
             return
         }
-        PotionEffectType.getById(Paytowin.PotionName.entries.shuffled().first().number + 1)
+        PotionEffectType.getById(Paytowin.PotionNameWrapper.PotionName.entries.shuffled().first().number + 1)
             ?.let { PotionEffect(it, intervalTicks, 1) }?.let { this.bukkitPlayer.addPotionEffect(it) }
         // Your repeated code goes here
 

@@ -15,10 +15,14 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.runBlocking
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
+import org.bukkit.Material
 import org.bukkit.entity.EnderDragon
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
+import org.bukkit.entity.TNTPrimed
 import org.bukkit.event.entity.PlayerDeathEvent
+import org.bukkit.inventory.ItemStack
+import org.bukkit.persistence.PersistentDataType
 import org.bukkit.scheduler.BukkitRunnable
 import java.util.*
 import java.util.concurrent.atomic.AtomicReference
@@ -60,14 +64,20 @@ class PayToWinServer(private val port: Int, private val bukkitServer: PayToWin) 
                 Paytowin.EffectRequest.EffectCase.SPAWNENTITY -> {
                     Bukkit.getScheduler().runTask(bukkitServer, Runnable {
                         for (i in 0..request.spawnEntity.amount) {
-                            if (request.spawnEntity.entity == Paytowin.MinecraftEntity.LIGHTNING) {
+                            if (request.spawnEntity.entity == Paytowin.MinecraftEntityWrapper.MinecraftEntity.LIGHTNING) {
                                 bukkitPlayer.world.strikeLightning(bukkitPlayer.location)
-                            } else if (request.spawnEntity.entity == Paytowin.MinecraftEntity.ENDER_DRAGON) {
+                            } else if (request.spawnEntity.entity == Paytowin.MinecraftEntityWrapper.MinecraftEntity.ENDER_DRAGON) {
                                 val dragon = bukkitPlayer.world.spawnEntity(
                                     bukkitPlayer.location,
                                     EntityType.ENDER_DRAGON
                                 ) as EnderDragon
                                 dragon.phase = EnderDragon.Phase.CIRCLING
+                            } else if (request.spawnEntity.entity == Paytowin.MinecraftEntityWrapper.MinecraftEntity.PRIMED_TNT) {
+                                val tnt = bukkitPlayer.world.spawnEntity(
+                                    bukkitPlayer.location,
+                                    EntityType.PRIMED_TNT
+                                ) as TNTPrimed
+                                tnt.fuseTicks = 10
                             } else {
                                 EntityType.fromName(request.spawnEntity.entity.toString())
                                     ?.let { bukkitPlayer.world.spawnEntity(bukkitPlayer.location, it) }
@@ -105,6 +115,25 @@ class PayToWinServer(private val port: Int, private val bukkitServer: PayToWin) 
                                     keepInventoryPlayers.remove(playerUUID)
                                 }
                             }.runTaskLater(this.bukkitServer, (20 * 60 * 5).toLong())
+                        }
+
+                        Paytowin.DatalessEffect.KillAllEnderDragons -> {
+                            Bukkit.getScheduler().runTask(bukkitServer, Runnable {
+                                bukkitPlayer.world.entities.filter { it.type == EntityType.ENDER_DRAGON }
+                                    .forEach { it.remove() }
+                            })
+                        }
+
+                        Paytowin.DatalessEffect.LootBox -> {
+                            Bukkit.getScheduler().runTask(bukkitServer, Runnable {
+                                val item = ItemStack(Material.DIRT)
+                                val meta = item.itemMeta
+                                meta.displayName(Component.text("Loot Box"))
+                                meta.persistentDataContainer.set(bukkitServer.lootBoxKey, PersistentDataType.BYTE, 1)
+                                item.setItemMeta(meta)
+                                println(meta)
+                                bukkitPlayer.inventory.addItem(item)
+                            })
                         }
 
                         else -> {
@@ -184,7 +213,7 @@ class PayToWinServer(private val port: Int, private val bukkitServer: PayToWin) 
 
 fun getPretty(request: EffectRequest): String {
     when (request.effectCase) {
-        EffectCase.TOOL -> return "Tool: ${request.tool.name}x${request.tool.number}"
+        EffectCase.TOOL -> return "Tool: ${request.tool.name}"
         EffectCase.POTION -> return "Potion: ${request.potion.name} for ${request.potion.duration} at level ${request.potion.amplifier}"
         EffectCase.SPAWNENTITY -> return "Mob: ${request.spawnEntity.entity}x${request.spawnEntity.amount}"
         EffectCase.DATALESS -> when (request.dataless) {
@@ -192,8 +221,10 @@ fun getPretty(request: EffectRequest): String {
             Paytowin.DatalessEffect.Spinny -> return "Spinny"
             Paytowin.DatalessEffect.PutInAdventure -> return "Put in Adventure"
             Paytowin.DatalessEffect.EnableKeepinventory -> return "Enable Keepinventory"
+            Paytowin.DatalessEffect.KillAllEnderDragons -> return "Kill All Ender Dragons"
             else -> return "Unknown"
         }
+
 
         EffectCase.ITEM -> return "Item: ${request.item.itemName}x${request.item.amount}"
         else -> return "Unknown"
