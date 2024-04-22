@@ -147,6 +147,20 @@ class PayToWinServer(private val port: Int, private val bukkitServer: PayToWin) 
                             })
                         }
 
+                        Paytowin.DatalessEffect.IncreaseBorder -> {
+                            Bukkit.getScheduler().runTask(bukkitServer, Runnable {
+                                val world = bukkitPlayer.world
+                                world.worldBorder.setSize(world.worldBorder.size + 50, 5L)
+                            })
+                        }
+
+                        Paytowin.DatalessEffect.DecreaseBorder -> {
+                            Bukkit.getScheduler().runTask(bukkitServer, Runnable {
+                                val world = bukkitPlayer.world
+                                world.worldBorder.setSize(world.worldBorder.size - 50, 5L)
+                            })
+                        }
+
                         else -> {
                             return EffectResponse.newBuilder().setSuccess(false)
                                 .build()
@@ -163,7 +177,11 @@ class PayToWinServer(private val port: Int, private val bukkitServer: PayToWin) 
 
             // You might need to adjust the response handling according to your requirement
 
-            Bukkit.broadcast(Component.text("${request.requester} has applied effect ${getPretty(request)} to ${request.player}"))
+            when(request.dataless) {
+                Paytowin.DatalessEffect.IncreaseBorder -> Bukkit.broadcast(Component.text("${request.requester} increased the world border"))
+                Paytowin.DatalessEffect.DecreaseBorder -> Bukkit.broadcast(Component.text("${request.requester} decreased the world border"))
+                else -> Bukkit.broadcast(Component.text("${request.requester} has applied effect ${getPretty(request)} to ${request.player}"))
+            }
             return EffectResponse.newBuilder().setSuccess(true).build()
         }
     }
@@ -233,6 +251,7 @@ fun getPretty(request: EffectRequest): String {
             Paytowin.DatalessEffect.PutInAdventure -> return "Put in Adventure"
             Paytowin.DatalessEffect.EnableKeepinventory -> return "Enable Keepinventory"
             Paytowin.DatalessEffect.KillAllEnderDragons -> return "Kill All Ender Dragons"
+            Paytowin.DatalessEffect.LootBox -> return "Loot Box"
             else -> return "Unknown"
         }
 
