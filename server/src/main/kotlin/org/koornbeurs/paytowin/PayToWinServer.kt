@@ -63,7 +63,7 @@ class PayToWinServer(private val port: Int, private val bukkitServer: PayToWin) 
                 Paytowin.EffectRequest.EffectCase.POTION -> effectApplier.potion(request.potion)
                 Paytowin.EffectRequest.EffectCase.SPAWNENTITY -> {
                     Bukkit.getScheduler().runTask(bukkitServer, Runnable {
-                        for (i in 0..request.spawnEntity.amount) {
+                        for (i in 1..request.spawnEntity.amount) {
                             if (request.spawnEntity.entity == Paytowin.MinecraftEntityWrapper.MinecraftEntity.LIGHTNING) {
                                 bukkitPlayer.world.strikeLightning(bukkitPlayer.location)
                             } else if (request.spawnEntity.entity == Paytowin.MinecraftEntityWrapper.MinecraftEntity.ENDER_DRAGON) {
@@ -77,10 +77,21 @@ class PayToWinServer(private val port: Int, private val bukkitServer: PayToWin) 
                                     bukkitPlayer.location,
                                     EntityType.PRIMED_TNT
                                 ) as TNTPrimed
+                                tnt.persistentDataContainer.set(bukkitServer.cantExplode, PersistentDataType.BYTE, 1)
                                 tnt.fuseTicks = 10
                             } else {
                                 EntityType.fromName(request.spawnEntity.entity.toString())
-                                    ?.let { bukkitPlayer.world.spawnEntity(bukkitPlayer.location, it) }
+                                    ?.let {
+                                        val ent = bukkitPlayer.world.spawnEntity(
+                                            bukkitPlayer.location,
+                                            it
+                                        );
+                                        ent.persistentDataContainer.set(
+                                            bukkitServer.cantExplode,
+                                            PersistentDataType.BYTE,
+                                            1
+                                        )
+                                    }
                             }
                         }
                     })
