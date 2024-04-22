@@ -17,7 +17,7 @@ function App() {
   const transport: GrpcWebFetchTransport = new GrpcWebFetchTransport({
     baseUrl: "http://localhost:8080",
     meta: {
-      password: "password",
+      password: "assword",
     },
   });
 
@@ -215,7 +215,7 @@ function App() {
     .filter(([, value]) => typeof value === "number")
     .map(([key, value]) => ({
       value: value as PotionNameWrapper_PotionName,
-      label: key,
+      label: key.toLowerCase().replace(/[_]+/g, " ").split(" ").map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join(" "),
     }));
 
   const listOfMiscEffects = Object.entries(DatalessEffect)
@@ -236,7 +236,7 @@ function App() {
     .filter(([, value]) => typeof value === "number")
     .map(([key, value]) => ({
       value: value as MinecraftMaterialWrapper_MinecraftMaterial,
-      label: key,
+      label: key.toLowerCase().replace(/[_]+/g, " ").split(" ").map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join(" "),
     }));
 
   const itemAmountList = [
@@ -251,7 +251,7 @@ function App() {
     .filter(([, value]) => typeof value === "number")
     .map(([key, value]) => ({
       value: value as MinecraftEntityWrapper_MinecraftEntity,
-      label: key,
+      label: key.toLowerCase().replace(/[_]+/g, " ").split(" ").map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join(" "),
     }));
 
   const entityAmountList = [
@@ -349,6 +349,7 @@ function App() {
                     changeEffectType("item");
                   }
                 }}
+                
               />
             </div>
             Amount:
