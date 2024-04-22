@@ -1,24 +1,13 @@
-// import { useEffect, useState } from 'react' //useState } from 'react'
-// import './App.css'
-// //import { GrpcWebFetchTransport } from '@protobuf-ts/grpcweb-transport'
-// //import { PlayersRequest } from './paytowin_pb';
-// //import { PaytowinClientImpl } from './paytowin';
-// import { Client, UnaryCallback } from '@grpc/grpc-js/build/src/client';
-// import * as grpc from '@grpc/grpc-js';
-// import { PaytowinClientImpl, PaytowinServiceName, PlayersRequest, PlayersResponse } from './paytowin';
-// import { Observable } from 'rxjs';
-
 import { GrpcWebFetchTransport } from "@protobuf-ts/grpcweb-transport";
 import { PayToWinClient } from "./generated/paytowin.client";
 import {
   DatalessEffect,
   DiamondTool,
   EffectRequest,
-  MinecraftEntity,
-  MinecraftMaterial,
+  MinecraftEntityWrapper_MinecraftEntity,
+  MinecraftMaterialWrapper_MinecraftMaterial,
   PlayersRequest,
-  PotionName,
-  SpawnEntity,
+  PotionNameWrapper_PotionName,
 } from "./generated/paytowin";
 import { useEffect, useState } from "react";
 import "./index.css";
@@ -28,7 +17,7 @@ function App() {
   const transport: GrpcWebFetchTransport = new GrpcWebFetchTransport({
     baseUrl: "http://localhost:8080",
     meta: {
-      password: "assword",
+      password: "password",
     },
   });
 
@@ -40,18 +29,18 @@ function App() {
 
   const [selectedEffect, selectEffect] = useState<string>("");
 
-  const [selectedPotionEffect, selectPotionEffect] = useState<PotionName>();
+  const [selectedPotionEffect, selectPotionEffect] = useState<PotionNameWrapper_PotionName>();
 
   const [selectedMiscEffect, selectMiscEffect] = useState<DatalessEffect>();
 
   const [selectedToolEffect, selectToolEffect] = useState<DiamondTool>();
 
-  const [selectedItemEffect, selectItemEffect] = useState<MinecraftMaterial>();
+  const [selectedItemEffect, selectItemEffect] = useState<MinecraftMaterialWrapper_MinecraftMaterial>();
 
   const [itemAmount, selectItemAmount] = useState<number>();
 
   const [selectedEntityEffect, selectEntityEffect] =
-    useState<MinecraftEntity>();
+    useState<MinecraftEntityWrapper_MinecraftEntity>();
 
   const [entityAmount, selectEntityAmount] = useState<number>();
 
@@ -101,7 +90,7 @@ function App() {
     );
   };
 
-  const applyPotionEffect = (player: string, effect: PotionName): void => {
+  const applyPotionEffect = (player: string, effect: PotionNameWrapper_PotionName): void => {
     client.applyEffect(
       EffectRequest.create({
         effect: {
@@ -120,7 +109,7 @@ function App() {
 
   const applyItemEffect = (
     player: string,
-    effect: MinecraftMaterial,
+    effect: MinecraftMaterialWrapper_MinecraftMaterial,
     amount: number,
   ): void => {
     client.applyEffect(
@@ -140,7 +129,7 @@ function App() {
 
   const applyEntityEffect = (
     player: string,
-    effect: MinecraftEntity,
+    effect: MinecraftEntityWrapper_MinecraftEntity,
     amount: number,
   ): void => {
     client.applyEffect(
@@ -163,7 +152,7 @@ function App() {
       EffectRequest.create({
         effect: {
           potion: {
-            name: PotionName.LEVITATION,
+            name: PotionNameWrapper_PotionName.LEVITATION,
             duration: 1,
             amplifier: 100,
           },
@@ -205,10 +194,27 @@ function App() {
     alert("success");
   };
 
-  const listOfPotionEffects = Object.entries(PotionName)
+  type Effect = EffectRequest['effect'];
+  type ExtractOneOfKind<T> = T extends { oneofKind: infer U } ? U : never;
+  type EffectTypes = ExtractOneOfKind<Effect>;
+
+  type ValueLabelPair<T> = {
+    value: T;
+    label: string;
+  };
+
+  const effectMapping: ValueLabelPair<EffectTypes>[] = [
+    { value: "potion", label: "Potion effect" },
+    { value: "dataless", label: "Miscellaneous effect" },
+    { value: "tool", label: "Give a diamond tool" },
+    { value: "item", label: "Give a certain amount of items" },
+    { value: "spawnEntity", label: "Spawn a certain amount of entities" },
+  ];
+
+  const listOfPotionEffects = Object.entries(PotionNameWrapper_PotionName)
     .filter(([, value]) => typeof value === "number")
     .map(([key, value]) => ({
-      value: value as PotionName,
+      value: value as PotionNameWrapper_PotionName,
       label: key,
     }));
 
@@ -226,10 +232,10 @@ function App() {
       label: key,
     }));
 
-  const listOfItemEffects = Object.entries(MinecraftMaterial)
+  const listOfItemEffects = Object.entries(MinecraftMaterialWrapper_MinecraftMaterial)
     .filter(([, value]) => typeof value === "number")
     .map(([key, value]) => ({
-      value: value as MinecraftMaterial,
+      value: value as MinecraftMaterialWrapper_MinecraftMaterial,
       label: key,
     }));
 
@@ -241,10 +247,10 @@ function App() {
     { value: 64, label: 64 },
   ];
 
-  const listOfEntityEffects = Object.entries(MinecraftEntity)
+  const listOfEntityEffects = Object.entries(MinecraftEntityWrapper_MinecraftEntity)
     .filter(([, value]) => typeof value === "number")
     .map(([key, value]) => ({
-      value: value as MinecraftEntity,
+      value: value as MinecraftEntityWrapper_MinecraftEntity,
       label: key,
     }));
 
@@ -259,7 +265,7 @@ function App() {
   return (
     <>
       <div className="text-xl font-bold m-2">Koornbeurs Minecraft LAN</div>
-      <div className="m-2">
+      <div className="m-2 p-2 border-t-2 border-b-2 border-black border-solid bg-gray-200">
         Requester:{" "}
         <input
           className="outline"
@@ -275,80 +281,63 @@ function App() {
           <div className="font-bold">{selectedPlayer}</div>
         )}
       </div>
-      <div className="m-2">
+      <div className="m-2 p-2 border-t-2 border-b-2 border-black border-solid bg-gray-200">
         Players online:
-        <div className="flex flex-col sm:flex-row">
-          {playersOnline.map((player: string) => (
-            <div
-              className="bg-blue-400 hover:bg-blue-500 p-2 m-2 max-w-fit"
-              onClick={() => selectPlayer(player)}
-            >
-              {player}
-            </div>
-          ))}
-        </div>
+          <ReactSelect 
+            options = {playersOnline.map((player: string) => {
+              return { value: player, label: player }
+            })}
+            onChange = {(newValue): void => {
+              if (newValue) {
+                selectPlayer(newValue.value);
+              }
+            }}
+          />
       </div>
       <div className="m-2">
         Selected effect:{" "}
-        {selectedEffect == "" ? (
+        {selectedEffect == "" || !effectType || !effectMapping ? (
           "None"
+        ) : selectedEffect == "Send to heaven" ? (
+          <div className="font-bold">{"Special effect: " + selectedEffect}</div>
         ) : (
-          <div className="font-bold">{selectedEffect}</div>
+          <div className="font-bold">{effectMapping.find(x => x.value == effectType)!.label + ": " + selectedEffect}</div>
         )}
       </div>
       <div className="m-2">
         Effects:
-        <div className="flex flex-col">
-          <div
-            className="bg-blue-400 hover:bg-blue-500 p-2 m-2 max-w-fit"
-            onClick={() => selectEffect("Send to heaven")}
-          >
-            Send to heaven!
-          </div>
+        <div className="flex flex-col p-2 bg-gray-200 border-black border-t-2 border-t-solid border-b-2 border-b-solid">
+        
           <div>
-            Some misc effects:
+            What effect type would you like to select:
             <ReactSelect
-              options={listOfMiscEffects}
+              options={effectMapping}
               onChange={(newValue): void => {
                 if (newValue) {
-                  console.log(newValue.value);
-                  selectMiscEffect(newValue.value);
-                  selectEffect(newValue.label);
-                  changeEffectType("dataless");
+                  console.log(newValue);
+                  changeEffectType(newValue.value);
+                  selectEffect("");
                 }
               }}
             />
           </div>
-          <div>
-            Specific potion effects (mild, and 60 seconds):
-            <ReactSelect
-              options={listOfPotionEffects}
-              onChange={(newValue): void => {
-                if (newValue) {
-                  console.log(newValue.value);
-                  selectPotionEffect(newValue.value);
-                  selectEffect(newValue.label);
-                  changeEffectType("potion");
-                }
-              }}
-            />
-          </div>
-          <div>
-            Give a diamond item:
-            <ReactSelect
-              options={listOfToolEffects}
-              onChange={(newValue): void => {
-                if (newValue) {
-                  console.log(newValue.value);
-                  selectToolEffect(newValue.value);
-                  selectEffect(newValue.label);
-                  changeEffectType("tool");
-                }
-              }}
-            />
-          </div>
-          <div className="flex flex-row w-full m-2">
-            Give a certain amount of items: Item:
+          {effectType == "dataless" ? 
+            (<div>
+              Some misc effects:
+              <ReactSelect
+                options={listOfMiscEffects}
+                onChange={(newValue): void => {
+                  if (newValue) {
+                    console.log(newValue.value);
+                    selectMiscEffect(newValue.value);
+                    selectEffect(newValue.label);
+                    changeEffectType("dataless");
+                  }
+                }}
+              />
+            </div>) : effectType == "item" ?
+            (<div className="flex flex-row w-full m-2">
+            <div className="w-1/4">Give a certain amount of items &#40;Tappers we trust you to not give away 32 diamond blocks for 1 beer or similar!&#41; :</div> <div>Item:</div>
             <div className="w-1/4 m-2">
               <ReactSelect
                 options={listOfItemEffects}
@@ -374,155 +363,95 @@ function App() {
                 }}
               />
             </div>
+          </div>) : effectType == "potion" ?
+          (<div>
+            Specific potion effects (mild, and 60 seconds):
+            <ReactSelect
+              options={listOfPotionEffects}
+              onChange={(newValue): void => {
+                if (newValue) {
+                  console.log(newValue.value);
+                  selectPotionEffect(newValue.value);
+                  selectEffect(newValue.label);
+                  changeEffectType("potion");
+                }
+              }}
+            />
+          </div>) : effectType == "tool" ?
+          (<div>
+            Give a diamond item:
+            <ReactSelect
+              options={listOfToolEffects}
+              onChange={(newValue): void => {
+                if (newValue) {
+                  console.log(newValue.value);
+                  selectToolEffect(newValue.value);
+                  selectEffect(newValue.label);
+                  changeEffectType("tool");
+                }
+              }}
+            />
+          </div>) : effectType == "spawnEntity" ?
+          (<div className="flex flex-row">
+          Spawn a certain amount of mobs: Mob:
+          <div className="w-1/4 m-2">
+            <ReactSelect
+              options={listOfEntityEffects}
+              onChange={(newValue): void => {
+                if (newValue) {
+                  console.log(newValue.value);
+                  selectEntityEffect(newValue.value);
+                  selectEffect(newValue.label);
+                  changeEffectType("spawnEntity");
+                }
+              }}
+            />
           </div>
-          <div className="flex flex-row">
-            Spawn a certain amount of mobs: Mob:
-            <div className="w-1/4 m-2">
-              <ReactSelect
-                options={listOfEntityEffects}
-                onChange={(newValue): void => {
-                  if (newValue) {
-                    console.log(newValue.value);
-                    selectEntityEffect(newValue.value);
-                    selectEffect(newValue.label);
-                    changeEffectType("spawnEntity");
-                  }
-                }}
-              />
-            </div>
-            Amount:
-            <div className="w-1/4 m-2">
-              <ReactSelect
-                options={entityAmountList}
-                onChange={(newValue): void => {
-                  if (newValue) {
-                    console.log(newValue.value);
-                    selectEntityAmount(newValue.value);
-                  }
-                }}
-              />
-            </div>
+          Amount:
+          <div className="w-1/4 m-2">
+            <ReactSelect
+              options={entityAmountList}
+              onChange={(newValue): void => {
+                if (newValue) {
+                  console.log(newValue.value);
+                  selectEntityAmount(newValue.value);
+                }
+              }}
+            />
+          </div>
+        </div>) : <></>
+          }
+          
+          
+          
+          
+          
+        </div>
+        <div className="bg-gray-200 border-black border-b-2 border-b-solid">
+          One more special effect that doesn't fall under the other types:
+          <div
+            className="bg-blue-400 hover:bg-blue-500 p-2 m-2 max-w-fit"
+            onClick={() => selectEffect("Send to heaven")}
+          >
+            Send to heaven!
           </div>
         </div>
       </div>
       <div
         className="bg-red-400 hover:bg-red-500 p-2 m-2 max-w-fit"
-        onClick={() => applyEffect()}
+        onClick={() => {
+          applyEffect();
+          selectEffect("");
+          changeEffectType(undefined);
+          selectPlayer("");
+        }}
       >
         Apply the effect!
       </div>
     </>
   );
 
-  // //const [count, setCount] = useState(0)
-
-  // const client = new Client("https://localhost:50051", grpc.credentials.createInsecure());
-
-  // //const grpcClient = grpc.makeClientConstructor(grpc.)
-
-  // // const transport = new GrpcWebFetchTransport({
-  // //   baseUrl: "http://localhost:50051",
-  // //   meta: {
-  // //     "password": "password"
-  // //   }
-  // // });
-
-  // type RpcRequestImpl = (service: string, method: string, data: Uint8Array) => Promise<Uint8Array>;
-
-  // const sendRequest: RpcRequestImpl = (service, method, data) => {
-  //   const path = `/${service}/${method}`;
-
-  //   return new Promise((resolve, reject) => {
-  //     // makeUnaryRequest transmits the result (and error) with a callback
-  //     // transform this into a promise!
-  //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  //     const resultCallback: UnaryCallback<any> = (err, res) => {
-  //       if (err) {
-  //         return reject(err);
-  //       }
-  //       resolve(res);
-  //     };
-
-  //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  //     function passThrough(argument: any) {
-  //       return argument;
-  //     }
-
-  //     // Using passThrough as the serialize and deserialize functions
-  //     client.makeUnaryRequest(path, passThrough, passThrough, data, resultCallback);
-  //   });
-  // }
-
-  // type RpcObservableImpl = (service: string, method: string, data: Uint8Array) => Observable<Uint8Array>;
-
-  // const sendServerStreamingRequest: RpcObservableImpl = (service, method, data) => {
-  //   return new Observable<Uint8Array>(() => {
-  //     const path = `/${service}/${method}`;
-
-  //     // const resultCallback = (err: Error | null, res: Uint8Array | null) => {
-  //     //     if (err) {
-  //     //         subscriber.error(err);
-  //     //         return;
-  //     //     }
-  //     //     if (res) {
-  //     //         subscriber.next(res);
-  //     //     } else {
-  //     //         // End the stream if no more data is expected.
-  //     //         subscriber.complete();
-  //     //     }
-  //     // };
-
-  //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  //     function passThrough(argument: any) {
-  //       return argument;
-  //     }
-
-  //     const metadata = new grpc.Metadata();
-  //     metadata.add("password", "password");
-
-  //     // Assuming conn is your connection object and it has a method to handle server streaming
-  //     // This method should be designed to keep the connection open and emit data as it arrives
-  //     client.makeServerStreamRequest(path, passThrough, passThrough, data, metadata);
-
-  //     // Return a teardown logic which will be invoked when the Observable is unsubscribed
-  //     // return () => {
-  //     //     // Here you should implement the logic to cancel the server streaming if possible
-  //     //     // This could be sending a cancel message to the server or closing the connection
-  //     //     client.close();
-  //     // };
-  // });
-  // }
-
-  // const rpc = {
-  //   request: sendRequest,
-  //   //clientStreamingRequest: sendRequest,
-  //   serverStreamingRequest: sendServerStreamingRequest,
-  //   //bidirectionalStreamingRequest: sendRequest,
-  // };
-
-  // const PayToWinClient: PaytowinClientImpl = new PaytowinClientImpl(rpc, { service: PaytowinServiceName });
-
-  // const [players, setPlayers] = useState([] as string[]);
-
-  // useEffect(() => {
-  //   const playerResponse = PayToWinClient.GetPlayers(PlayersRequest.create());
-  //   (async () => {
-  //     try {
-  //         playerResponse.subscribe((response: PlayersResponse) => {
-  //           setPlayers(response.players);
-  //         })
-  //     } catch (error) {
-  //       console.log(error)
-  //     }
-  //   })()
-
-  // }, [])
-
-  // return (<>
-  //   <div>
-  //     Players online: {players.map(player => (<div>{player}</div>))}
-  //   </div>
-  // </>);
+  
 }
 
 export default App;
