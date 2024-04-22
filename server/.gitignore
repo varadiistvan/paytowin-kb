@@ -2,6 +2,9 @@
 .idea/
 PaperServer/
 
+.vscode
+bin
+
 *.iml
 *.ipr
 *.iws

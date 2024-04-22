@@ -88,6 +88,8 @@ enum DatalessEffect {
   EnableKeepinventory = 3;
   KillAllEnderDragons = 4;
   LootBox = 5;
+  IncreaseBorder = 6;
+  DecreaseBorder = 7;
 }
 
 message EffectRequest {
