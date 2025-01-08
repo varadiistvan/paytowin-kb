@@ -15,7 +15,7 @@ import ReactSelect from "react-select";
 
 function App() {
   const transport: GrpcWebFetchTransport = new GrpcWebFetchTransport({
-    baseUrl: "http://localhost:8080",
+    baseUrl: "http://192.168.2.45:8080",
     meta: {
       password: "assword",
     },
@@ -29,13 +29,15 @@ function App() {
 
   const [selectedEffect, selectEffect] = useState<string>("");
 
-  const [selectedPotionEffect, selectPotionEffect] = useState<PotionNameWrapper_PotionName>();
+  const [selectedPotionEffect, selectPotionEffect] =
+    useState<PotionNameWrapper_PotionName>();
 
   const [selectedMiscEffect, selectMiscEffect] = useState<DatalessEffect>();
 
   const [selectedToolEffect, selectToolEffect] = useState<DiamondTool>();
 
-  const [selectedItemEffect, selectItemEffect] = useState<MinecraftMaterialWrapper_MinecraftMaterial>();
+  const [selectedItemEffect, selectItemEffect] =
+    useState<MinecraftMaterialWrapper_MinecraftMaterial>();
 
   const [itemAmount, selectItemAmount] = useState<number>();
 
@@ -90,7 +92,10 @@ function App() {
     );
   };
 
-  const applyPotionEffect = (player: string, effect: PotionNameWrapper_PotionName): void => {
+  const applyPotionEffect = (
+    player: string,
+    effect: PotionNameWrapper_PotionName,
+  ): void => {
     client.applyEffect(
       EffectRequest.create({
         effect: {
@@ -194,7 +199,7 @@ function App() {
     alert("success");
   };
 
-  type Effect = EffectRequest['effect'];
+  type Effect = EffectRequest["effect"];
   type ExtractOneOfKind<T> = T extends { oneofKind: infer U } ? U : never;
   type EffectTypes = ExtractOneOfKind<Effect>;
 
@@ -215,7 +220,12 @@ function App() {
     .filter(([, value]) => typeof value === "number")
     .map(([key, value]) => ({
       value: value as PotionNameWrapper_PotionName,
-      label: key.toLowerCase().replace(/[_]+/g, " ").split(" ").map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join(" "),
+      label: key
+        .toLowerCase()
+        .replace(/[_]+/g, " ")
+        .split(" ")
+        .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+        .join(" "),
     }));
 
   const listOfMiscEffects = Object.entries(DatalessEffect)
@@ -232,11 +242,18 @@ function App() {
       label: key,
     }));
 
-  const listOfItemEffects = Object.entries(MinecraftMaterialWrapper_MinecraftMaterial)
+  const listOfItemEffects = Object.entries(
+    MinecraftMaterialWrapper_MinecraftMaterial,
+  )
     .filter(([, value]) => typeof value === "number")
     .map(([key, value]) => ({
       value: value as MinecraftMaterialWrapper_MinecraftMaterial,
-      label: key.toLowerCase().replace(/[_]+/g, " ").split(" ").map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join(" "),
+      label: key
+        .toLowerCase()
+        .replace(/[_]+/g, " ")
+        .split(" ")
+        .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+        .join(" "),
     }));
 
   const itemAmountList = [
@@ -247,11 +264,18 @@ function App() {
     { value: 64, label: 64 },
   ];
 
-  const listOfEntityEffects = Object.entries(MinecraftEntityWrapper_MinecraftEntity)
+  const listOfEntityEffects = Object.entries(
+    MinecraftEntityWrapper_MinecraftEntity,
+  )
     .filter(([, value]) => typeof value === "number")
     .map(([key, value]) => ({
       value: value as MinecraftEntityWrapper_MinecraftEntity,
-      label: key.toLowerCase().replace(/[_]+/g, " ").split(" ").map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join(" "),
+      label: key
+        .toLowerCase()
+        .replace(/[_]+/g, " ")
+        .split(" ")
+        .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+        .join(" "),
     }));
 
   const entityAmountList = [
@@ -283,16 +307,16 @@ function App() {
       </div>
       <div className="m-2 p-2 border-t-2 border-b-2 border-black border-solid bg-gray-200">
         Players online:
-          <ReactSelect 
-            options = {playersOnline.map((player: string) => {
-              return { value: player, label: player }
-            })}
-            onChange = {(newValue): void => {
-              if (newValue) {
-                selectPlayer(newValue.value);
-              }
-            }}
-          />
+        <ReactSelect
+          options={playersOnline.map((player: string) => {
+            return { value: player, label: player };
+          })}
+          onChange={(newValue): void => {
+            if (newValue) {
+              selectPlayer(newValue.value);
+            }
+          }}
+        />
       </div>
       <div className="m-2">
         Selected effect:{" "}
@@ -301,13 +325,16 @@ function App() {
         ) : selectedEffect == "Send to heaven" ? (
           <div className="font-bold">{"Special effect: " + selectedEffect}</div>
         ) : (
-          <div className="font-bold">{effectMapping.find(x => x.value == effectType)!.label + ": " + selectedEffect}</div>
+          <div className="font-bold">
+            {effectMapping.find((x) => x.value == effectType)!.label +
+              ": " +
+              selectedEffect}
+          </div>
         )}
       </div>
       <div className="m-2">
         Effects:
         <div className="flex flex-col p-2 bg-gray-200 border-black border-t-2 border-t-solid border-b-2 border-b-solid">
-        
           <div>
             What effect type would you like to select:
             <ReactSelect
@@ -321,8 +348,8 @@ function App() {
               }}
             />
           </div>
-          {effectType == "dataless" ? 
-            (<div>
+          {effectType == "dataless" ? (
+            <div>
               Some misc effects:
               <ReactSelect
                 options={listOfMiscEffects}
@@ -335,98 +362,102 @@ function App() {
                   }
                 }}
               />
-            </div>) : effectType == "item" ?
-            (<div className="flex flex-row w-full m-2">
-            <div className="w-1/4">Give a certain amount of items &#40;Tappers we trust you to not give away 32 diamond blocks for 1 beer or similar!&#41; :</div> <div>Item:</div>
-            <div className="w-1/4 m-2">
+            </div>
+          ) : effectType == "item" ? (
+            <div className="flex flex-row w-full m-2">
+              <div className="w-1/4">
+                Give a certain amount of items &#40;Tappers we trust you to not
+                give away 32 diamond blocks for 1 beer or similar!&#41; :
+              </div>{" "}
+              <div>Item:</div>
+              <div className="w-1/4 m-2">
+                <ReactSelect
+                  options={listOfItemEffects}
+                  onChange={(newValue): void => {
+                    if (newValue) {
+                      console.log(newValue.value);
+                      selectItemEffect(newValue.value);
+                      selectEffect(newValue.label);
+                      changeEffectType("item");
+                    }
+                  }}
+                />
+              </div>
+              Amount:
+              <div className="w-1/4 m-2">
+                <ReactSelect
+                  options={itemAmountList}
+                  onChange={(newValue): void => {
+                    if (newValue) {
+                      console.log(newValue.value);
+                      selectItemAmount(newValue.value);
+                    }
+                  }}
+                />
+              </div>
+            </div>
+          ) : effectType == "potion" ? (
+            <div>
+              Specific potion effects (mild, and 60 seconds):
               <ReactSelect
-                options={listOfItemEffects}
+                options={listOfPotionEffects}
                 onChange={(newValue): void => {
                   if (newValue) {
                     console.log(newValue.value);
-                    selectItemEffect(newValue.value);
+                    selectPotionEffect(newValue.value);
                     selectEffect(newValue.label);
-                    changeEffectType("item");
+                    changeEffectType("potion");
                   }
                 }}
-                
               />
             </div>
-            Amount:
-            <div className="w-1/4 m-2">
+          ) : effectType == "tool" ? (
+            <div>
+              Give a diamond item:
               <ReactSelect
-                options={itemAmountList}
+                options={listOfToolEffects}
                 onChange={(newValue): void => {
                   if (newValue) {
                     console.log(newValue.value);
-                    selectItemAmount(newValue.value);
+                    selectToolEffect(newValue.value);
+                    selectEffect(newValue.label);
+                    changeEffectType("tool");
                   }
                 }}
               />
             </div>
-          </div>) : effectType == "potion" ?
-          (<div>
-            Specific potion effects (mild, and 60 seconds):
-            <ReactSelect
-              options={listOfPotionEffects}
-              onChange={(newValue): void => {
-                if (newValue) {
-                  console.log(newValue.value);
-                  selectPotionEffect(newValue.value);
-                  selectEffect(newValue.label);
-                  changeEffectType("potion");
-                }
-              }}
-            />
-          </div>) : effectType == "tool" ?
-          (<div>
-            Give a diamond item:
-            <ReactSelect
-              options={listOfToolEffects}
-              onChange={(newValue): void => {
-                if (newValue) {
-                  console.log(newValue.value);
-                  selectToolEffect(newValue.value);
-                  selectEffect(newValue.label);
-                  changeEffectType("tool");
-                }
-              }}
-            />
-          </div>) : effectType == "spawnEntity" ?
-          (<div className="flex flex-row">
-          Spawn a certain amount of mobs: Mob:
-          <div className="w-1/4 m-2">
-            <ReactSelect
-              options={listOfEntityEffects}
-              onChange={(newValue): void => {
-                if (newValue) {
-                  console.log(newValue.value);
-                  selectEntityEffect(newValue.value);
-                  selectEffect(newValue.label);
-                  changeEffectType("spawnEntity");
-                }
-              }}
-            />
-          </div>
-          Amount:
-          <div className="w-1/4 m-2">
-            <ReactSelect
-              options={entityAmountList}
-              onChange={(newValue): void => {
-                if (newValue) {
-                  console.log(newValue.value);
-                  selectEntityAmount(newValue.value);
-                }
-              }}
-            />
-          </div>
-        </div>) : <></>
-          }
-          
-          
-          
-          
-          
+          ) : effectType == "spawnEntity" ? (
+            <div className="flex flex-row">
+              Spawn a certain amount of mobs: Mob:
+              <div className="w-1/4 m-2">
+                <ReactSelect
+                  options={listOfEntityEffects}
+                  onChange={(newValue): void => {
+                    if (newValue) {
+                      console.log(newValue.value);
+                      selectEntityEffect(newValue.value);
+                      selectEffect(newValue.label);
+                      changeEffectType("spawnEntity");
+                    }
+                  }}
+                />
+              </div>
+              Amount:
+              <div className="w-1/4 m-2">
+                <ReactSelect
+                  options={entityAmountList}
+                  onChange={(newValue): void => {
+                    if (newValue) {
+                      console.log(newValue.value);
+                      selectEntityAmount(newValue.value);
+                    }
+                  }}
+                />
+              </div>
+            </div>
+          ) : (
+            <></>
+          )}
         </div>
         <div className="bg-gray-200 border-black border-b-2 border-b-solid">
           One more special effect that doesn't fall under the other types:
@@ -451,8 +482,6 @@ function App() {
       </div>
     </>
   );
-
-  
 }
 
 export default App;
