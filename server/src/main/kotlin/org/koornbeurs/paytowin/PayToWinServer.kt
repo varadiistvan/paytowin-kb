@@ -64,7 +64,7 @@ class PayToWinServer(private val port: Int, private val bukkitServer: PayToWin) 
                 Paytowin.EffectRequest.EffectCase.SPAWNENTITY -> {
                     Bukkit.getScheduler().runTask(bukkitServer, Runnable {
                         for (i in 1..request.spawnEntity.amount) {
-                            if (request.spawnEntity.entity == Paytowin.MinecraftEntityWrapper.MinecraftEntity.LIGHTNING) {
+                            if (request.spawnEntity.entity == Paytowin.MinecraftEntityWrapper.MinecraftEntity.LIGHTNING_BOLT) {
                                 bukkitPlayer.world.strikeLightning(bukkitPlayer.location)
                             } else if (request.spawnEntity.entity == Paytowin.MinecraftEntityWrapper.MinecraftEntity.ENDER_DRAGON) {
                                 val dragon = bukkitPlayer.world.spawnEntity(
@@ -72,10 +72,10 @@ class PayToWinServer(private val port: Int, private val bukkitServer: PayToWin) 
                                     EntityType.ENDER_DRAGON
                                 ) as EnderDragon
                                 dragon.phase = EnderDragon.Phase.CIRCLING
-                            } else if (request.spawnEntity.entity == Paytowin.MinecraftEntityWrapper.MinecraftEntity.PRIMED_TNT) {
+                            } else if (request.spawnEntity.entity == Paytowin.MinecraftEntityWrapper.MinecraftEntity.TNT) {
                                 val tnt = bukkitPlayer.world.spawnEntity(
                                     bukkitPlayer.location,
-                                    EntityType.PRIMED_TNT
+                                    EntityType.TNT
                                 ) as TNTPrimed
                                 tnt.persistentDataContainer.set(bukkitServer.cantExplode, PersistentDataType.BYTE, 1)
                                 tnt.fuseTicks = 10

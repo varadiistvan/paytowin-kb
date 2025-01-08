@@ -2,7 +2,7 @@ plugins {
     id 'java'
     id 'org.jetbrains.kotlin.jvm'
     id "com.google.protobuf" version "0.9.4"
-    id 'com.github.johnrengelman.shadow' version '7.1.0'
+    id 'com.gradleup.shadow' version '8.3.2'
 }
 
 group = 'org.koornbeurs'
@@ -30,19 +30,19 @@ repositories {
 }
 
 dependencies {
-    compileOnly "io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT"
+    compileOnly "io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     implementation 'io.grpc:grpc-kotlin-stub:1.4.1'
-    implementation 'io.grpc:grpc-protobuf:1.61.0'
-    implementation 'io.grpc:grpc-netty:1.61.0'
-    implementation 'io.grpc:grpc-services:1.61.0'
-    implementation 'com.google.protobuf:protobuf-kotlin:3.25.2'
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0-RC2"
-    implementation 'io.github.cdimascio:dotenv-kotlin:6.4.1'
-    implementation 'com.jeff-media:custom-block-data:2.2.2'
+    implementation 'io.grpc:grpc-protobuf:1.68.0'
+    implementation 'io.grpc:grpc-netty:1.68.0'
+    implementation 'io.grpc:grpc-services:1.68.0'
+    implementation 'com.google.protobuf:protobuf-kotlin:4.28.2'
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0"
+    implementation 'io.github.cdimascio:dotenv-kotlin:6.4.2'
+    implementation 'com.jeff-media:custom-block-data:2.2.3'
 }
 
-def targetJavaVersion = 17
+def targetJavaVersion = 21
 java {
     def javaVersion = JavaVersion.toVersion(targetJavaVersion)
     if (JavaVersion.current() < javaVersion) {
@@ -82,7 +82,7 @@ processResources {
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(21)
 }
 
 protobuf {
