@@ -6,6 +6,9 @@ import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.enchantments.Enchantment
+import org.bukkit.entity.ComplexEntityPart
+import org.bukkit.entity.EnderDragon
+import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -152,6 +155,17 @@ class PayToWin : JavaPlugin(), Listener {
         }
     }
 
+    @EventHandler
+    fun stopDragonDamage(event: EntityExplodeEvent) // Listen for the event...
+    {
+        var e: Entity? = event.getEntity()
+        if (e is ComplexEntityPart)  // it it's a part of a dragon...
+            e = e.parent // ... get the dragon...
+
+        if (e is EnderDragon)  // if it's a dragon...
+            event.blockList()
+                .clear() // ...clear the list of destroyed blocks. A event.setCancelled(true); should work, too, just have a look what you like more. ;)
+    }
 
     private fun chooseBucket(): Pair<List<ItemStack>, String> {
         val chance = Random.nextDouble()
