@@ -14,14 +14,49 @@ import "./index.css";
 import ReactSelect from "react-select";
 
 function App() {
-  const transport: GrpcWebFetchTransport = new GrpcWebFetchTransport({
-    baseUrl: "http://minecraft.koornbeurs.net:8080",
-    meta: {
-      password: "assword",
-    },
-  });
+  const [password, setPassword] = useState<string>(
+    localStorage.getItem("password") ?? "",
+  );
 
-  const client: PayToWinClient = new PayToWinClient(transport);
+  const takePass = () => {
+    console.log("Takepass called");
+    let inp = prompt("What's the password");
+    console.log("prompted");
+    if (inp) {
+      setPassword(inp);
+      localStorage.setItem("password", inp);
+    }
+  };
+
+  useEffect(() => {
+    if (password === "") {
+      console.log("Takepass from initial effect");
+      takePass();
+    }
+  }, [password]);
+
+  useEffect(() => {
+    console.log(password);
+    if (password === "") {
+      takePass();
+      return;
+    }
+    try {
+      let t = new GrpcWebFetchTransport({
+        baseUrl: "http://minecraft.koornbeurs.net:8080",
+        meta: {
+          password: password,
+        },
+      });
+      let c = new PayToWinClient(t);
+      setClient(c);
+    } catch (e) {
+      console.log("Takepass from passwordchange failed client");
+      takePass();
+    }
+  }, [password]);
+
+  const [client, setClient] = useState<PayToWinClient | undefined>(undefined);
 
   const [playersOnline, setPlayersOnline] = useState<string[]>([] as string[]);
 
@@ -52,22 +87,26 @@ function App() {
     useState<EffectRequest["effect"]["oneofKind"]>(undefined);
 
   useEffect(() => {
-    const playersResponse = client.getPlayers(PlayersRequest.create());
-
+    if (client === undefined) return;
     (async () => {
       try {
+        const playersResponse = client?.getPlayers(PlayersRequest.create());
+        if (playersResponse == undefined) {
+          throw "Bruh";
+        }
         for await (const { players } of playersResponse.responses) {
           console.log(players);
           setPlayersOnline(players);
         }
-      } catch (error) {
-        console.log(error);
+      } catch (e) {
+        console.log("Takepass from failed players" + e);
+        takePass();
       }
     })();
-  }, []);
+  }, [client]);
 
   const applyMiscEffect = (player: string, effect: DatalessEffect): void => {
-    client.applyEffect(
+    client?.applyEffect(
       EffectRequest.create({
         effect: {
           dataless: effect,
@@ -80,7 +119,7 @@ function App() {
   };
 
   const applyToolEffect = (player: string, effect: DiamondTool): void => {
-    client.applyEffect(
+    client?.applyEffect(
       EffectRequest.create({
         effect: {
           tool: effect,
@@ -96,7 +135,7 @@ function App() {
     player: string,
     effect: PotionNameWrapper_PotionName,
   ): void => {
-    client.applyEffect(
+    client?.applyEffect(
       EffectRequest.create({
         effect: {
           potion: {
@@ -117,7 +156,7 @@ function App() {
     effect: MinecraftMaterialWrapper_MinecraftMaterial,
     amount: number,
   ): void => {
-    client.applyEffect(
+    client?.applyEffect(
       EffectRequest.create({
         effect: {
           item: {
@@ -137,7 +176,7 @@ function App() {
     effect: MinecraftEntityWrapper_MinecraftEntity,
     amount: number,
   ): void => {
-    client.applyEffect(
+    client?.applyEffect(
       EffectRequest.create({
         effect: {
           spawnEntity: {
@@ -153,7 +192,7 @@ function App() {
   };
 
   const sendToHeaven = (player: string): void => {
-    client.applyEffect(
+    client?.applyEffect(
       EffectRequest.create({
         effect: {
           potion: {
