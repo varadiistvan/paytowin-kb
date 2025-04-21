@@ -12,5 +12,8 @@ export default defineConfig({
     postcss: {
       plugins: [tailwindcss()],
     }
-  } 
+  },
+  server: {
+    allowedHosts: ["minecraft.koornbeurs.net"]
+  }
 })

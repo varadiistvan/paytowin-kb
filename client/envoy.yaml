@@ -74,5 +74,5 @@ static_resources:
               - endpoint:
                   address:
                     socket_address:
-                      address: 192.168.1.19
+                      address: minecraft.koornbeurs.net
                       port_value: 50051

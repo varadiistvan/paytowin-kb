@@ -15,7 +15,7 @@ import ReactSelect from "react-select";
 
 function App() {
   const transport: GrpcWebFetchTransport = new GrpcWebFetchTransport({
-    baseUrl: "http://192.168.2.45:8080",
+    baseUrl: "http://minecraft.koornbeurs.net:8080",
     meta: {
       password: "assword",
     },
