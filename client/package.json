@@ -21,7 +21,7 @@
     "@protobuf-ts/runtime": "^2.9.4",
     "@types/node": "^22.6.0",
     "events": "^3.3.0",
-    "google-protobuf": "^3.21.4",
+    "google-protobuf": "^4.0.0",
     "grpc-tools": "^1.12.4",
     "protoc-gen-ts": "^0.8.7",
     "react": "^18.3.1",
