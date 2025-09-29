@@ -20,7 +20,10 @@ function App() {
 
   const takePass = () => {
     console.log("Takepass called");
-    let inp = prompt("What's the password");
+    let inp = prompt(
+      "What's the password",
+      localStorage.getItem("password") ?? "",
+    );
     console.log("prompted");
     if (inp) {
       setPassword(inp);
@@ -36,24 +39,13 @@ function App() {
   }, [password]);
 
   useEffect(() => {
-    console.log(password);
-    if (password === "") {
-      takePass();
-      return;
-    }
-    try {
-      let t = new GrpcWebFetchTransport({
-        baseUrl: "http://minecraft.koornbeurs.net:8080",
-        meta: {
-          password: password,
-        },
-      });
-      let c = new PayToWinClient(t);
-      setClient(c);
-    } catch (e) {
-      console.log("Takepass from passwordchange failed client");
-      takePass();
-    }
+    if (password === "") return;
+    const t = new GrpcWebFetchTransport({
+      baseUrl: "http://minecraft.koornbeurs.net:8080",
+      meta: { password },
+    });
+    const c = new PayToWinClient(t);
+    setClient(c);
   }, [password]);
 
   const [client, setClient] = useState<PayToWinClient | undefined>(undefined);
@@ -100,7 +92,8 @@ function App() {
         }
       } catch (e) {
         console.log("Takepass from failed players" + e);
-        takePass();
+        localStorage.removeItem("password");
+        setPassword("");
       }
     })();
   }, [client]);
