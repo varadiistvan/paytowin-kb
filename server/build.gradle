@@ -33,9 +33,9 @@ dependencies {
     compileOnly "io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     implementation 'io.grpc:grpc-kotlin-stub:1.4.1'
-    implementation 'io.grpc:grpc-protobuf:1.68.0'
-    implementation 'io.grpc:grpc-netty:1.68.0'
-    implementation 'io.grpc:grpc-services:1.68.0'
+    implementation 'io.grpc:grpc-protobuf:1.76.0'
+    implementation 'io.grpc:grpc-netty:1.76.0'
+    implementation 'io.grpc:grpc-services:1.76.0'
     implementation 'com.google.protobuf:protobuf-kotlin:4.28.2'
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0"
     implementation 'io.github.cdimascio:dotenv-kotlin:6.4.2'
@@ -91,7 +91,7 @@ protobuf {
     }
     plugins {
         create("grpc") {
-            artifact = "io.grpc:protoc-gen-grpc-java:1.61.0"
+            artifact = "io.grpc:protoc-gen-grpc-java:1.76.0"
         }
         create("grpckt") {
             artifact = "io.grpc:protoc-gen-grpc-kotlin:1.4.1:jdk8@jar"
