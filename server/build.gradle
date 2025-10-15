@@ -36,7 +36,7 @@ dependencies {
     implementation 'io.grpc:grpc-protobuf:1.68.0'
     implementation 'io.grpc:grpc-netty:1.68.0'
     implementation 'io.grpc:grpc-services:1.68.0'
-    implementation 'com.google.protobuf:protobuf-kotlin:4.28.2'
+    implementation 'com.google.protobuf:protobuf-kotlin:4.33.0'
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0"
     implementation 'io.github.cdimascio:dotenv-kotlin:6.4.2'
     implementation 'com.jeff-media:custom-block-data:2.2.3'
@@ -87,7 +87,7 @@ kotlin {
 
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:3.25.2"
+        artifact = "com.google.protobuf:protoc:3.25.8"
     }
     plugins {
         create("grpc") {
